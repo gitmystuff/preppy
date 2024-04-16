@@ -11,7 +11,7 @@ def identify_quasi_consts(df):
   # quasi constant values
   quasi_consts = []
   for val in df.columns.sort_values():
-      if (len(df[val].unique()) < 3 and max(df[val].value_counts(normalize=True)) > .98):
+      if (len(df[val].unique()) < 3 and max(df[val].value_counts(normalize=True)) > .95):
           quasi_consts.append(val)
 
   return quasi_consts
