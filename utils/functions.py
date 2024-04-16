@@ -8,10 +8,13 @@ def identify_consts(df):
   return constant_features
 
 def identify_quasi_consts(df):
-  # quasi constant values (sometimes these may be boolean features)
+  # quasi constant values
+  quasi_consts = []
   for val in df.columns.sort_values():
-      if (len(df[val].unique()) < 3):
-          print(df[val].value_counts())
+      if (len(df[val].unique()) < 3 and max(df[val].value_counts(normalize=True)) > .98):
+          quasi_consts.append(val)
+
+  return quasi_consts
 
 def check_row_duplicates(df):
   # duplicate rows
@@ -26,4 +29,5 @@ def check_col_duplicates(df):
       for dupe in df.columns[i + 1:]:
           if df[orig].equals(df[dupe]):
               duplicate_features.append(dupe)
-              print(f'{orig} looks the same as {dupe}')
+
+  return duplicate_features
