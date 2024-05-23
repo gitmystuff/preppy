@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler, RobustScaler
 
 def hello_4050():
   return 'Hello 4050' 
@@ -76,6 +76,12 @@ def handle_standard_scaler(df):
 
 def handle_minmax_scaler(df):
   feat = str(df._get_numeric_data().idxmax(1)[0])
-  scaler = StandardScaler()
+  scaler = MinMaxScaler()
+  df[feat] = scaler.fit_transform(df[[feat]].values)
+  return df
+
+def handle_outliers(df):
+  feat = str(df._get_numeric_data().idxmax(1)[0])
+  scaler = RobustScaler()
   df[feat] = scaler.fit_transform(df[[feat]].values)
   return df
