@@ -2,9 +2,6 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder, StandardScaler, MinMaxScaler, RobustScaler
 
-def hello_4050():
-  return 'Hello 4050' 
-
 def identify_consts(df):
   constant_features = [
       feat for feat in df.columns if len(df[feat].unique()) == 1
