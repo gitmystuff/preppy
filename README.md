@@ -16,3 +16,4 @@ PrepPy Functions
 * handle_standard_scaler
 * handle_minmax_scaler
 * handle_outliers
+* do_OHE
