@@ -8,11 +8,11 @@ def identify_consts(df):
   ]
   return constant_features
 
-def identify_quasi_consts(df):
+def identify_quasi_consts(df, thresh=0.95):
   # quasi constant values
   quasi_consts = []
   for val in df.columns.sort_values():
-      if (len(df[val].unique()) < 3 and max(df[val].value_counts(normalize=True)) > .95):
+      if (len(df[val].unique()) < 3 and max(df[val].value_counts(normalize=True)) > thresh):
           quasi_consts.append(val)
 
   return quasi_consts
@@ -35,13 +35,14 @@ def check_col_duplicates(df):
 
 def do_OHE(df):
   cat_features = []
-  for feat in df.select_dtypes('object'):
+  for feat in df.select_dtypes(include=['object', 'category']):
     if len(df[feat].value_counts()) < 3:
       df[feat] = df[feat].map({df[feat].value_counts().index[0]: 0, df[feat].value_counts().index[1]: 1})
+      df[feat] = df[feat].astype(int)
     elif 2 < len(df[feat].value_counts()) < 6:
       cat_features.append(feat)
     elif len(df[feat].value_counts()) > 5:
-      freq = df.groupby(feat).size()/len(df)
+      freq = df.groupby(feat, observed=False).size()/len(df)
       df[feat] = df[feat].map(freq)
 
   ohe = OneHotEncoder(categories='auto', drop='first', sparse_output=False, handle_unknown='ignore')
@@ -50,20 +51,21 @@ def do_OHE(df):
   df.index = df.index
   df = df.join(ohe_df)
   df.drop(cat_features, axis=1, inplace=True)
-
   return df
 
 def handle_missing_values(df):
+  df_categorical_features = df.select_dtypes(include=['category', 'object']).columns
+  dfx = df.copy()
   for feat in df.columns[df.isnull().sum() > 1]:
-    if df[feat].dtype == 'object':
-      df[feat].fillna(df[feat].mode()[0], inplace=True)
+    if feat in df_categorical_features:
+      dfx[feat] = df[feat].fillna(df[feat].mode()[0])
     else:
       if abs(df[feat].skew()) < .8:
-        df[feat].fillna(round(df[feat].mean(), 2), inplace=True)
+        dfx[feat] = df[feat].fillna(round(df[feat].mean(), 2))
       else:
-        df[feat].fillna(df[feat].median(), inplace=True)
+        dfx[feat] = df[feat].fillna(df[feat].median())
 
-  return df
+  return dfx
 
 def handle_standard_scaler(df):
   feat = str(df._get_numeric_data().idxmax(1)[0])
