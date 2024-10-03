@@ -19,8 +19,8 @@ class RemoveConstants(BaseEstimator, TransformerMixin):
     return X.values
 
 class RemoveQuasiConstants(BaseEstimator, TransformerMixin):
-  def __init__(self):
-    pass
+  def __init__(self, thresh=0.95):
+    self.thresh=thresh
 
   def fit(self, X, y=None):
     return self
@@ -29,7 +29,7 @@ class RemoveQuasiConstants(BaseEstimator, TransformerMixin):
     if isinstance(X, np.ndarray):
         X = pd.DataFrame(X)
 
-    vars = utils.identify_quasi_consts(X)
+    vars = utils.identify_quasi_consts(X, thresh=self.thresh)
     X.drop(vars, axis=1, inplace=True)
     return X.values
 
