@@ -62,3 +62,17 @@ class HandleMissingValues(BaseEstimator, TransformerMixin):
 
     X = utils.handle_missing_values(X)
     return X.values
+
+class PerformOHE(BaseEstimator, TransformerMixin):
+  def __init__(self):
+    pass
+
+  def fit(self, X, y=None):
+    return self
+
+  def transform(self, X):
+    if isinstance(X, np.ndarray):
+        X = pd.DataFrame(X)
+
+    X = utils.do_OHE(X)
+    return X.values
