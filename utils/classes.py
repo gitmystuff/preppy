@@ -123,4 +123,94 @@ class ConstantAndSemiConstantRemover(BaseEstimator, TransformerMixin):
         self.fit(X, y)
         return self.transform(X)
 
+class DuplicateRemoverDF(BaseEstimator, TransformerMixin):
+    """
+    A transformer that removes duplicate rows and columns from a Pandas DataFrame.
 
+    Parameters:
+    -----------
+    remove_rows : bool, optional
+        Whether to remove duplicate rows. Defaults to True.
+    remove_columns : bool, optional
+        Whether to remove duplicate columns. Defaults to True.
+
+    Attributes:
+    -----------
+    original_columns_ : list
+        The original column indices before removing duplicates.
+    original_rows_ : list
+        The original row indices before removing duplicates.
+
+    """
+
+    def __init__(self, remove_rows=True, remove_columns=True):
+        self.remove_rows = remove_rows
+        self.remove_columns = remove_columns
+        self.original_columns_ = None
+        self.original_rows_ = None
+
+    def fit(self, X, y=None):
+        """
+        Fits the transformer to the input data.
+
+        Parameters:
+        -----------
+        X : pandas DataFrame of shape (n_samples, n_features)
+            The input data.
+        y : array-like of shape (n_samples,), optional
+            The target values. Ignored.
+
+        Returns:
+        --------
+        self : object
+            Returns the instance itself.
+        """
+        if self.remove_columns:
+            _, self.original_columns_ = np.unique(X.values, axis=1, return_index=True)
+        if self.remove_rows:
+            _, self.original_rows_ = np.unique(X.values, axis=0, return_index=True)
+        return self
+
+    def transform(self, X):
+        """
+        Transforms the input data by removing duplicate rows and columns.
+
+        Parameters:
+        -----------
+        X : pandas DataFrame of shape (n_samples, n_features)
+            The input data.
+
+        Returns:
+        --------
+        X_transformed : pandas DataFrame of shape (n_samples_transformed, n_features_transformed)
+            The transformed data.
+        """
+        if self.remove_columns:
+            X = X.iloc[:, self.original_columns_]
+        if self.remove_rows:
+            X = X.iloc[self.original_rows_, :]
+        return X
+
+    def fit_transform(self, X, y=None, **fit_params):
+        """
+        Fits to data, then transforms it.
+        Fits transformer to X and y with optional parameters fit_params
+        and returns a transformed version of X.
+
+        Parameters
+        ----------
+        X : pandas DataFrame of shape (n_samples, n_features)
+            Input samples.
+        y : array-like of shape (n_samples,) or (n_samples, n_outputs), \
+            default=None
+            Target values (ignored).
+        **fit_params : dict
+            Additional fit parameters.
+
+        Returns
+        -------
+        X_new : pandas DataFrame of shape (n_samples_new, n_features_new)
+            Transformed array.
+        """
+        self.fit(X, y)
+        return self.transform(X)
